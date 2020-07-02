@@ -32,27 +32,27 @@
     components: { Modal },
     data() {
       return {
-        modal: false,
+        modal: false, // modalの表示/非表示管理
         groupName: '',
         groups: [],
-        groupChannel: null
+        groupChannel: null // ActionCable用
       }
     },
     created() {
       this.groupChannel = this.$cable.subscriptions.create( "GroupChannel",{
         received: (data) => {
-          console.log(data)
-          // ここでdata.groupsにpush
-          // this.messages.push(data)
+          // ActionCableで配信されてきたものがdataに入る
+          this.groups.push(data)
         },
       })
     },
     mounted() {
+      // マウント直後にグループ一覧を取得
       this.fetchGroups()
     },
     methods: {
       fetchGroups() {
-        // /api/booksを叩いてレスポンスをresで受け取る
+        // /api/groupsを叩いてレスポンスをresで受け取る
         axios.get('/api/groups').then((res) => {
           // res.dataにコントローラで作った@groupsのJSONが入ってる
           for(var i = 0; i < res.data.length; i++) {
@@ -60,7 +60,7 @@
             this.groups.push(res.data[i]);
           }
         }, (error) => {
-          console.log(error);
+          alert(error)
         });
       },
       openModal() {
@@ -70,8 +70,9 @@
         this.modal = false
       },
       submitGroup() {
-        // ここでaction_cable叩く
+        // モーダルで入力された値
         const groupName = this.groupName
+        // ここでActionCable叩く。パラメータとしてgroupNameを送る
         this.groupChannel.perform('create', {
           groupName: groupName,
         });

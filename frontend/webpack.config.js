@@ -4,7 +4,10 @@ const { VueLoaderPlugin } = require("vue-loader");
 module.exports = {
   devtool: 'inline-source-map',
   entry: {
-    application: './src/main.js',
+    application: [
+      './node_modules/modern-css-reset/dist/reset.min.css',
+      './src/main.js',
+    ]
   },
   // コンパイル後の出力先
   output: {

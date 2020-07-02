@@ -1,22 +1,29 @@
 <template>
-  <div class='message'>
-    {{ greeting }} world!
+  <div class='Wrapper'>
+    <Sidebar />
+    <ChatMain />
   </div>
 </template>
 
 <script>
-  module.exports = {
+  import Sidebar from './components/Sidebar.vue'
+  import ChatMain from './components/ChatMain.vue'
+
+  export default {
     data: ()=>{
       return {
         greeting: 'hello'
       }
+    },
+    components: {
+      Sidebar,
+      ChatMain
     }
   }
 </script>
 
 <style scoped>
-  .message {
-    font-size: 2rem;
-    color: blue;
+  .Wrapper {
+    display: flex;
   }
 </style>

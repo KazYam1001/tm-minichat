@@ -17,6 +17,15 @@
       <p class='message'>hello</p>
       <p class='message'>hi</p>
       <p class='message'>good bye</p>
+      <p class='message'>hello</p>
+      <p class='message'>hi</p>
+      <p class='message'>good bye</p>
+      <p class='message'>hello</p>
+      <p class='message'>hi</p>
+      <p class='message'>good bye</p>
+      <p class='message'>hello</p>
+      <p class='message'>hi</p>
+      <p class='message'>good bye</p>
     </section>
     <form action="#" class="message-form">
       <input type="text" class='message-text-field'>
@@ -34,8 +43,7 @@
     width: calc(100vw - 200px);
     display: flex;
     flex-direction: column;
-    padding-left: 1rem;
-    padding-right: 1rem;
+    padding: 1rem;
     color: #222;
   }
   .group-header {
@@ -65,6 +73,7 @@
     padding-top: 1rem;
     padding-left: 1.5rem;
     flex-grow: 1;
+    overflow: scroll;
   }
   .message {
     margin-bottom: 1rem;

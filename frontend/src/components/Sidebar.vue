@@ -16,115 +16,16 @@
       <!-- slot name=footer ここまで -->
     </Modal>
     <section class='group-container'>
-      <div class='group'>
-        <p class='group-name'>グループ名</p>
-        <span class='group-notice'>2</span>
-      </div>
-      <div class='group'>
-        <p class='group-name'>グループ名</p>
-        <span class='group-notice'>2</span>
-      </div>
-      <div class='group'>
-        <p class='group-name'>グループ名</p>
-        <span class='group-notice'>2</span>
-      </div>
-      <div class='group'>
-        <p class='group-name'>グループ名</p>
-        <span class='group-notice'>2</span>
-      </div>
-      <div class='group'>
-        <p class='group-name'>グループ名</p>
-        <span class='group-notice'>2</span>
-      </div>
-      <div class='group'>
-        <p class='group-name'>グループ名</p>
-        <span class='group-notice'>2</span>
-      </div>
-      <div class='group'>
-        <p class='group-name'>グループ名</p>
-        <span class='group-notice'>2</span>
-      </div>
-      <div class='group'>
-        <p class='group-name'>グループ名</p>
-        <span class='group-notice'>2</span>
-      </div>
-      <div class='group'>
-        <p class='group-name'>グループ名</p>
-        <span class='group-notice'>2</span>
-      </div>
-      <div class='group'>
-        <p class='group-name'>グループ名</p>
-        <span class='group-notice'>2</span>
-      </div>
-      <div class='group'>
-        <p class='group-name'>グループ名</p>
-        <span class='group-notice'>2</span>
-      </div>
-      <div class='group'>
-        <p class='group-name'>グループ名</p>
-        <span class='group-notice'>2</span>
-      </div>
-      <div class='group'>
-        <p class='group-name'>グループ名</p>
-        <span class='group-notice'>2</span>
-      </div>
-      <div class='group'>
-        <p class='group-name'>グループ名</p>
-        <span class='group-notice'>2</span>
-      </div>
-      <div class='group'>
-        <p class='group-name'>グループ名</p>
-        <span class='group-notice'>2</span>
-      </div>
-      <div class='group'>
-        <p class='group-name'>グループ名</p>
-        <span class='group-notice'>2</span>
-      </div>
-      <div class='group'>
-        <p class='group-name'>グループ名</p>
-        <span class='group-notice'>2</span>
-      </div>
-      <div class='group'>
-        <p class='group-name'>グループ名</p>
-        <span class='group-notice'>2</span>
-      </div>
-      <div class='group'>
-        <p class='group-name'>グループ名</p>
-        <span class='group-notice'>2</span>
-      </div>
-      <div class='group'>
-        <p class='group-name'>グループ名</p>
-        <span class='group-notice'>2</span>
-      </div>
-      <div class='group'>
-        <p class='group-name'>グループ名</p>
-        <span class='group-notice'>2</span>
-      </div>
-      <div class='group'>
-        <p class='group-name'>グループ名</p>
-        <span class='group-notice'>2</span>
-      </div>
-      <div class='group'>
-        <p class='group-name'>グループ名</p>
-        <span class='group-notice'>2</span>
-      </div>
-      <div class='group'>
-        <p class='group-name'>グループ名</p>
-        <span class='group-notice'>2</span>
-      </div>
-      <div class='group'>
-        <p class='group-name'>グループ名</p>
-        <span class='group-notice'>2</span>
-      </div>
-      <div class='group'>
-        <p class='group-name'>グループ名</p>
-        <span class='group-notice'>2</span>
+      <div class='group'  v-for="group in groups" :key="group.id">
+        <p class='group-name'>{{ group.name }}</p>
+        <span class='group-notice'> {{ group.id }} </span>
       </div>
     </section>
   </aside>
 </template>
 
 <script>
+  import axios from 'axios'
   import Modal from './Modal.vue'
 
   export default {
@@ -132,10 +33,36 @@
     data() {
       return {
         modal: false,
-        groupName: ''
+        groupName: '',
+        groups: [],
+        groupChannel: null
       }
     },
+    created() {
+      this.groupChannel = this.$cable.subscriptions.create( "GroupChannel",{
+        received: (data) => {
+          console.log(data)
+          // ここでdata.groupsにpush
+          // this.messages.push(data)
+        },
+      })
+    },
+    mounted() {
+      this.fetchGroups()
+    },
     methods: {
+      fetchGroups() {
+        // /api/booksを叩いてレスポンスをresで受け取る
+        axios.get('/api/groups').then((res) => {
+          // res.dataにコントローラで作った@groupsのJSONが入ってる
+          for(var i = 0; i < res.data.length; i++) {
+            // this.groupsに上記jsonをforで回しながらpushしていく
+            this.groups.push(res.data[i]);
+          }
+        }, (error) => {
+          console.log(error);
+        });
+      },
       openModal() {
         this.modal = true
       },
@@ -144,9 +71,13 @@
       },
       submitGroup() {
         // ここでaction_cable叩く
-        console.log(this.groupName)
+        const groupName = this.groupName
+        this.groupChannel.perform('create', {
+          groupName: groupName,
+        });
         this.closeModal()
         this.groupName = ''
+        return
       }
     }
   }

@@ -16,7 +16,7 @@
 
 <script>
   import axios from 'axios'
-  import {postGroup} from '../modules/axios.js'
+  import {postGroup} from '../modules/api.js'
 
   export default {
     data() {

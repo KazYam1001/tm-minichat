@@ -7,8 +7,7 @@ class GroupChannel < ApplicationCable::Channel
     # Any cleanup needed when channel is unsubscribed
   end
 
-  def create(data)
-    group = Group.create!(name: data['groupName'])
-    ActionCable.server.broadcast 'group_channel', group.attributes
+  def display(data)
+    ActionCable.server.broadcast 'group_channel', data['group']
   end
 end

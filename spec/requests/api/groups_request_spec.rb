@@ -10,7 +10,6 @@ RSpec.describe "Api::Groups", type: :request do
       # 後でデータ件数を数えたいのでresponse.bodyを加工しておく
       json = JSON.parse(response.body)
 
-      binding.pry
       expect(response).to have_http_status(:success)
       # ちゃんと全件取得しているか
       expect(json.length).to eq(10)

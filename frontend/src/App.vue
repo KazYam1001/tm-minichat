@@ -11,9 +11,7 @@
 
   export default {
     data: ()=>{
-      return {
-        greeting: 'hello'
-      }
+      return {}
     },
     components: {
       Sidebar,

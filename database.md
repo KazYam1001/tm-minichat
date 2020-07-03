@@ -1,5 +1,5 @@
 # users table
-ユーザーの情報を管理する
+(作成しない)ユーザーの情報を管理する
 ## columns
 |name|type|options|
 |-|-|-|
@@ -27,7 +27,7 @@
 
 
 # members
-どのgroupにどのuserが所属しているか管理する
+（作成しない）どのgroupにどのuserが所属しているか管理する
 ## columns
 |name|type|options|
 |-|-|-|

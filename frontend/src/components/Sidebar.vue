@@ -41,7 +41,6 @@
     created() {
       this.groupChannel = this.$cable.subscriptions.create( "GroupChannel",{
         received: (data) => {
-          console.log(data)
           // ActionCableで配信されてきたものがdataに入る
           this.groupList.push(data)
         },

@@ -1,7 +1,7 @@
 <template>
   <div class='Wrapper'>
-    <Sidebar />
-    <ChatMain />
+    <Sidebar :modal='modal' />
+    <ChatMain :modal='modal' />
   </div>
 </template>
 
@@ -11,12 +11,14 @@
 
   export default {
     data: ()=>{
-      return {}
+      return {
+        modal: false
+      }
     },
     components: {
       Sidebar,
       ChatMain
-    }
+    },
   }
 </script>
 

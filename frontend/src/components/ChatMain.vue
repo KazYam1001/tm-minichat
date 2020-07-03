@@ -3,7 +3,18 @@
     <header class='group-header'>
       <div class="current-group">
         <p class='current-group-name'>{{ this.currentGroup.name }}</p>
-        <p class='edit-group-btn'>編集</p>
+        <p @click="openModal" class='edit-group-btn'>編集</p>
+        <Modal ref='modal' @close='closeModal' v-if='modal'>
+          <!-- Modalのslotに差し込む -->
+          <label class='group-form-label'>新しいグループ名</label>
+          <div><input v-model="groupName"></div>
+          <!-- slot ここまで -->
+          <!-- Modalのslot name=footerに差し込む -->
+          <template slot="footer">
+            <button @click="updateGroup">編集</button>
+          </template>
+          <!-- slot name=footer ここまで -->
+        </Modal>
       </div>
       <p class='remove-group-btn'>チャットグループを削除する</p>
     </header>
@@ -36,12 +47,15 @@
 
 <script>
   import axios from 'axios'
-  import Sidebar from './Sidebar.vue'
+  import Modal from './Modal.vue'
 
   export default {
+    components: { Modal },
+    props: ['modal'],
     data() {
       return {
         currentGroup: '',
+        groupName: '',
       }
     },
     mounted() {
@@ -53,7 +67,17 @@
         axios.get(`/api/groups/${id}`).then((res) => {
           this.currentGroup = res.data
         })
-      }
+      },
+      updateGroup() {
+        console.log(2)
+      },
+      openModal() {
+        this.groupName = this.currentGroup.name
+        this.modal = true
+      },
+      closeModal() {
+        this.modal = false
+      },
     }
   }
 </script>
@@ -85,6 +109,10 @@
     margin-left: 1rem;
     padding-top: 1rem;
     color: #aaa;
+    cursor: pointer;
+  }
+  .group-form-label {
+    color: #222;
   }
   .remove-group-btn {
     margin-right: 1rem;

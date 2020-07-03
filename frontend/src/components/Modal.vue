@@ -25,10 +25,14 @@
     },
     methods: {
       createGroup() {
-        // csrfトークン
-        const token = document.querySelector('meta[name=csrf-token]').getAttribute('content')
         // モーダルで入力された値
         const groupName = this.$parent.groupName
+        if (groupName === '') {
+          alert('グループ名を入力して下さい')
+          return
+        }
+        // csrfトークン
+        const token = document.querySelector('meta[name=csrf-token]').getAttribute('content')
         // ActionCable用チャンネル
         const groupChannel = this.$parent.groupChannel
         // post /api/groups を叩く

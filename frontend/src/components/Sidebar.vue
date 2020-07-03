@@ -30,9 +30,9 @@
 
   export default {
     components: { Modal },
+    props: ['modal'],
     data() {
       return {
-        modal: false, // modalの表示/非表示管理
         groupName: '',
         groupList: [],
         groupChannel: null // ActionCable用

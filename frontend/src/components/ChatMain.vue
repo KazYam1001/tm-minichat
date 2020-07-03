@@ -2,7 +2,7 @@
   <article class='chat-main'>
     <header class='group-header'>
       <div class="current-group">
-        <p class='current-group-name'>CurrentGroup</p>
+        <p class='current-group-name'>{{ this.currentGroup.name }}</p>
         <p class='edit-group-btn'>編集</p>
       </div>
       <p class='remove-group-btn'>チャットグループを削除する</p>
@@ -35,6 +35,27 @@
 </template>
 
 <script>
+  import axios from 'axios'
+  import Sidebar from './Sidebar.vue'
+
+  export default {
+    data() {
+      return {
+        currentGroup: '',
+      }
+    },
+    mounted() {
+      this.fetchCurrentGroup()
+    },
+    methods: {
+      fetchCurrentGroup(id) {
+        // /api/groups/:idを叩く
+        axios.get(`/api/groups/${id}`).then((res) => {
+          this.currentGroup = res.data
+        })
+      }
+    }
+  }
 </script>
 
 <style scoped>

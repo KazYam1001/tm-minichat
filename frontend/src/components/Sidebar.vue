@@ -3,7 +3,7 @@
     <!-- クリックしたらopenModalメソッドを動かす -->
     <span @click="openModal" class="material-icons new-group-btn">add_circle_outline</span>
     <!-- data.modalがtrueになったらModalコンポーネントが表示される -->
-    <Modal @close='closeModal' v-if='modal'>
+    <Modal ref='modal' @close='closeModal' v-if='modal'>
       <!-- methodはこっちに書きたいのでslotを使う -->
       <!-- Modalのslotに差し込む -->
       <label class='group-form-label'>グループ名</label>
@@ -11,12 +11,12 @@
       <!-- slot ここまで -->
       <!-- Modalのslot name=footerに差し込む -->
       <template slot="footer">
-        <button @click="submitGroup">送信</button>
+        <button @click="createGroup">送信</button>
       </template>
       <!-- slot name=footer ここまで -->
     </Modal>
     <section class='group-container'>
-      <div class='group'  v-for="group in groups" :key="group.id">
+      <div class='group'  v-for="group in groupList" :key="group.id">
         <p class='group-name'>{{ group.name }}</p>
         <span class='group-notice'> {{ group.id }} </span>
       </div>
@@ -34,7 +34,7 @@
       return {
         modal: false, // modalの表示/非表示管理
         groupName: '',
-        groups: [],
+        groupList: [],
         groupChannel: null // ActionCable用
       }
     },
@@ -42,7 +42,7 @@
       this.groupChannel = this.$cable.subscriptions.create( "GroupChannel",{
         received: (data) => {
           // ActionCableで配信されてきたものがdataに入る
-          this.groups.push(data)
+          this.groupList.push(data)
         },
       })
     },
@@ -57,7 +57,7 @@
           // res.dataにコントローラで作った@groupsのJSONが入ってる
           for(var i = 0; i < res.data.length; i++) {
             // this.groupsに上記jsonをforで回しながらpushしていく
-            this.groups.push(res.data[i]);
+            this.groupList.push(res.data[i]);
           }
         }, (error) => {
           alert(error)
@@ -69,16 +69,8 @@
       closeModal() {
         this.modal = false
       },
-      submitGroup() {
-        // モーダルで入力された値
-        const groupName = this.groupName
-        // ここでActionCable叩く。パラメータとしてgroupNameを送る
-        this.groupChannel.perform('create', {
-          groupName: groupName,
-        });
-        this.closeModal()
-        this.groupName = ''
-        return
+      createGroup() {
+        this.$refs.modal.createGroup()
       }
     }
   }

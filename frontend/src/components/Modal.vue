@@ -14,6 +14,33 @@
   </transition>
 </template>
 
+<script>
+  import axios from 'axios'
+  import {postGroup} from '../modules/axios.js'
+
+  export default {
+    data() {
+      return {
+      }
+    },
+    methods: {
+      createGroup() {
+        // csrfトークン
+        const token = document.querySelector('meta[name=csrf-token]').getAttribute('content')
+        // モーダルで入力された値
+        const groupName = this.$parent.groupName
+        // ActionCable用チャンネル
+        const groupChannel = this.$parent.groupChannel
+        // post /api/groups を叩く
+        postGroup(token, groupName, groupChannel)
+        this.$parent.closeModal()
+        this.$parent.groupName = ''
+        return
+      }
+    }
+  }
+</script>
+
 <style>
   .modal-overlay {
     display: flex;

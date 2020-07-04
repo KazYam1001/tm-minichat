@@ -1,8 +1,7 @@
 <template>
   <aside class='sidebar'>
-    <!-- $emitでAppコンポーネントのom→openNewModalが発火する -->
     <span @click="openNewModal" class="material-icons new-group-btn">add_circle_outline</span>
-     <!-- $emitでAppコンポーネントのom→closeNewModalが発火する -->
+    <!-- 子コンポーネントからcloseの発火を受けたらcloseNewModalを動かす -->
     <Modal ref='modalNew' @close="closeNewModal" v-if='modalNew'>
       <!-- Modalのslotに差し込む -->
       <button @click="createGroup">送信</button>
@@ -56,7 +55,7 @@
       },
       createGroup() {
         // $refsで子コンポーネントのメソッドを使える
-        // modalNewはModalコンポーネントを呼ぶ時(6行目)にref=を使って名付けている
+        // modalNewはModalコンポーネントを呼ぶ時にref=を使って名付けている
         this.$refs.modalNew.createGroup()
       }
     }

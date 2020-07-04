@@ -3,9 +3,7 @@
     <header class='group-header'>
       <div class="current-group">
         <p class='current-group-name'>{{ this.currentGroup.name }}</p>
-        <!-- $emitでAppコンポーネントのom→openEditModalが発火する -->
         <p @click="openEditModal" class='edit-group-btn'>編集</p>
-        <!-- $emitでAppコンポーネントのcm→closeEditModalが発火する -->
         <Modal ref='modalEdit' @close="closeEditModal" v-if='modalEdit'>
           <!-- Modalのslotに差し込む -->
           <button @click="updateGroup">編集</button>

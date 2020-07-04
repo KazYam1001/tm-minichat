@@ -1,6 +1,7 @@
 <template>
   <transition name="modal" appear>
     <!-- イベントにselfをつけると他の要素に伝播しなくなる -->
+    <!-- $emitで親コンポーネントのcloseイベントを発火する -->
     <div class="modal-overlay" @click.self="$emit('close')">
       <div class="modal-window">
         <div class="modal-content">

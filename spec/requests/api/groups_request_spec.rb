@@ -2,7 +2,7 @@ require 'rails_helper'
 
 RSpec.describe "Api::Groups", type: :request do
   describe '#index (GET /api/groups)' do
-    it '/api/groups を叩くと正常なレスポンスを返す' do
+    it 'groupsのレコード全てを返す' do
       # 事前に10件用意する
       create_list(:group, 10)
 
@@ -13,6 +13,20 @@ RSpec.describe "Api::Groups", type: :request do
       expect(response).to have_http_status(:success)
       # ちゃんと全件取得しているか
       expect(json.length).to eq(10)
+    end
+  end
+
+  describe '#show (GET /api/groups/:id)' do
+    let(:group) { create(:group) }
+
+    it '期待したgroupsのレコード1件を返す' do
+      get api_group_path(group)
+
+      json = JSON.parse(response.body)
+
+      expect(response).to have_http_status(:success)
+      # 取得したグループが事前に作ったグループと同じか
+      expect(json['id']).to eq(group.id)
     end
   end
 

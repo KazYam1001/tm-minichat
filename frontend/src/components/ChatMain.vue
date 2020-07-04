@@ -3,17 +3,12 @@
     <header class='group-header'>
       <div class="current-group">
         <p class='current-group-name'>{{ this.currentGroup.name }}</p>
-        <p @click="openModal" class='edit-group-btn'>編集</p>
-        <Modal ref='modal' @close='closeModal' v-if='modal'>
+        <!-- $emitでAppコンポーネントのom→openEditModalが発火する -->
+        <p @click="openEditModal" class='edit-group-btn'>編集</p>
+        <!-- $emitでAppコンポーネントのcm→closeEditModalが発火する -->
+        <Modal ref='modalEdit' @close="closeEditModal" v-if='modalEdit'>
           <!-- Modalのslotに差し込む -->
-          <label class='group-form-label'>新しいグループ名</label>
-          <div><input v-model="groupName"></div>
-          <!-- slot ここまで -->
-          <!-- Modalのslot name=footerに差し込む -->
-          <template slot="footer">
-            <button @click="updateGroup">編集</button>
-          </template>
-          <!-- slot name=footer ここまで -->
+          <button @click="updateGroup">編集</button>
         </Modal>
       </div>
       <p class='remove-group-btn'>チャットグループを削除する</p>
@@ -47,36 +42,51 @@
 
 <script>
   import axios from 'axios'
+  import {getGroups} from '../modules/api'
   import Modal from './Modal.vue'
 
   export default {
     components: { Modal },
-    props: ['modal'],
     data() {
       return {
-        currentGroup: '',
-        groupName: '',
+        modalEdit: false,
+        currentGroup: {},
+        groupChannel: null // ActionCable用
       }
+    },
+    created() {
+      this.groupChannel = this.$cable.subscriptions.create( "GroupChannel",{
+        received: (data) => {
+          // ActionCableで配信されてきたものがdataに入る
+          // updateならdataはcurrentGroupと同じグループのはずなのでヘッダのグループ名を更新
+          // createの時は何もしない(Sidebarコンポーネントの更新はある)
+          if (data.id === this.currentGroup.id) {
+            this.currentGroup = data
+          }
+        },
+      })
     },
     mounted() {
       this.fetchCurrentGroup()
     },
     methods: {
+      openEditModal() {
+        this.modalEdit = true
+      },
+      closeEditModal() {
+        this.modalEdit = false
+      },
+      // api.jsに引っ越すとうまくいかない
+      // this.currentGroupに対して別メソッド内で代入するとおかしくなる？
       fetchCurrentGroup(id) {
-        // /api/groups/:idを叩く
-        axios.get(`/api/groups/${id}`).then((res) => {
-          this.currentGroup = res.data
-        })
+        axios
+          .get(`/api/groups/${id}`)
+            .then((res) => {
+              this.currentGroup = res.data
+            })
       },
       updateGroup() {
-        console.log(2)
-      },
-      openModal() {
-        this.groupName = this.currentGroup.name
-        this.modal = true
-      },
-      closeModal() {
-        this.modal = false
+        this.$refs.modalEdit.updateGroup(this.currentGroup.id)
       },
     }
   }

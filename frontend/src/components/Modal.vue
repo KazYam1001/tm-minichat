@@ -1,13 +1,14 @@
 <template>
   <transition name="modal" appear>
+    <!-- イベントにselfをつけると他の要素に伝播しなくなる -->
     <div class="modal-overlay" @click.self="$emit('close')">
       <div class="modal-window">
         <div class="modal-content">
-          <slot/>
+          <label class='group-form-label'>グループ名</label>
+          <div><input v-model="groupName"></div>
         </div>
         <footer class="modal-footer">
-          <slot name="footer">
-          </slot>
+          <slot />
         </footer>
       </div>
     </div>
@@ -16,31 +17,39 @@
 
 <script>
   import axios from 'axios'
-  import {postGroup} from '../modules/api.js'
+  import {postGroup, putGroup} from '../modules/api.js'
 
   export default {
     data() {
       return {
+        token: '',
+        groupName: ''
       }
+    },
+    mounted() {
+      this.token = document.querySelector('meta[name=csrf-token]').getAttribute('content')
     },
     methods: {
       createGroup() {
-        // モーダルで入力された値
-        const groupName = this.$parent.groupName
-        if (groupName === '') {
+        if (this.groupName === '') {
           alert('グループ名を入力して下さい')
           return
         }
-        // csrfトークン
-        const token = document.querySelector('meta[name=csrf-token]').getAttribute('content')
-        // ActionCable用チャンネル
-        const groupChannel = this.$parent.groupChannel
         // post /api/groups を叩く
-        postGroup(token, groupName, groupChannel)
-        this.$parent.closeModal()
-        this.$parent.groupName = ''
+        postGroup(this.token, this.groupName, this.$parent.groupChannel)
+        this.$emit('close')
+        this.groupName = ''
         return
-      }
+      },
+      updateGroup(groupId) {
+        if (this.groupName === '') {
+          alert('グループ名を入力して下さい')
+          return
+        }
+        // put /api/groups/:id を叩く
+        putGroup(this.token, groupId, this.groupName, this.$parent.groupChannel)
+        this.$emit('close')
+      },
     }
   }
 </script>
@@ -65,6 +74,9 @@
   }
   .modal-content {
     padding: 10px 20px;
+  }
+  .group-form-label {
+    color: #222;
   }
   .modal-footer {
     background: #ccc;

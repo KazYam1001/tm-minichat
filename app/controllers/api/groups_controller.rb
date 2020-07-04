@@ -14,6 +14,12 @@ class Api::GroupsController < ApplicationController
     render json: group
   end
 
+  def update
+    group = Group.find(params[:id])
+    group.update(group_params)
+    render json: group
+  end
+
   private
 
   def group_params

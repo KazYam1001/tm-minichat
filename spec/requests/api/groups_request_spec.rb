@@ -41,4 +41,34 @@ RSpec.describe "Api::Groups", type: :request do
       end
     end
   end
+
+  describe '#update (PUT /api/groups/:id)' do
+    let(:group) { create(:group, name: 'default_name') }
+
+    context '正常なパラメータの場合' do
+      let(:valid_params) {{ name: 'changed_name' }}
+
+      it 'グループ名が更新されること' do
+        put api_group_path(group), params: valid_params
+
+        expect(group.reload.name).to eq 'changed_name'
+      end
+
+      it '正常なレスポンスを返すこと' do
+        post api_groups_path(group), params: valid_params
+
+        expect(response).to have_http_status(:success)
+      end
+    end
+
+    context '異常なパラメータの場合' do
+      let(:invalid_params) {{ name: nil }}
+
+      it 'グループ名が更新されないこと' do
+        put api_group_path(group), params: invalid_params
+
+        expect(group.reload.name).to eq 'default_name'
+      end
+    end
+  end
 end

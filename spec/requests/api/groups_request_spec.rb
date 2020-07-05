@@ -87,16 +87,14 @@ RSpec.describe "Api::Groups", type: :request do
   end
 
   describe '#destroy (DELETE /api/groups/:id)' do
-    it 'groupsのレコードが1件減り、削除したgroupのidを返すこと' do
+    it 'groupsのレコードが1件減り、正常なレスポンスを返すこと' do
       group = create(:group)
 
       expect {
         delete api_group_path(group)
       }.to change(Group, :count).by(-1)
 
-      json = JSON.parse(response.body)
       expect(response).to have_http_status(:success)
-      expect(json['id']).to eq group.id.to_s
     end
   end
 end

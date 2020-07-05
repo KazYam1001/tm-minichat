@@ -20,6 +20,12 @@ class Api::GroupsController < ApplicationController
     render json: group
   end
 
+  def destroy
+    group = Group.find(params[:id])
+    group.destroy
+    render json: {id: params[:id]}
+  end
+
   private
 
   def group_params

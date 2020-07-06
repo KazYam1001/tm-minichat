@@ -4,8 +4,19 @@ class Api::GroupsController < ApplicationController
     render json: @groups
   end
 
+  def show
+    @group = (params[:id] == 'undefined') ? Group.first : Group.find(params[:id])
+    render json: @group
+  end
+
   def create
     group = Group.create(group_params)
+    render json: group
+  end
+
+  def update
+    group = Group.find(params[:id])
+    group.update(group_params)
     render json: group
   end
 

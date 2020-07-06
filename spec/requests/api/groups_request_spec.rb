@@ -2,7 +2,7 @@ require 'rails_helper'
 
 RSpec.describe "Api::Groups", type: :request do
   describe '#index (GET /api/groups)' do
-    it '/api/groups を叩くと正常なレスポンスを返す' do
+    it 'groupsのレコード全てを返す' do
       # 事前に10件用意する
       create_list(:group, 10)
 
@@ -13,6 +13,20 @@ RSpec.describe "Api::Groups", type: :request do
       expect(response).to have_http_status(:success)
       # ちゃんと全件取得しているか
       expect(json.length).to eq(10)
+    end
+  end
+
+  describe '#show (GET /api/groups/:id)' do
+    let(:group) { create(:group) }
+
+    it '期待したgroupsのレコード1件を返す' do
+      get api_group_path(group)
+
+      json = JSON.parse(response.body)
+
+      expect(response).to have_http_status(:success)
+      # 取得したグループが事前に作ったグループと同じか
+      expect(json['id']).to eq(group.id)
     end
   end
 
@@ -38,6 +52,36 @@ RSpec.describe "Api::Groups", type: :request do
         expect {
           post api_groups_path, params: invalid_params
         }.to_not change(Group, :count)
+      end
+    end
+  end
+
+  describe '#update (PUT /api/groups/:id)' do
+    let(:group) { create(:group, name: 'default_name') }
+
+    context '正常なパラメータの場合' do
+      let(:valid_params) {{ name: 'changed_name' }}
+
+      it 'グループ名が更新されること' do
+        put api_group_path(group), params: valid_params
+
+        expect(group.reload.name).to eq 'changed_name'
+      end
+
+      it '正常なレスポンスを返すこと' do
+        post api_groups_path(group), params: valid_params
+
+        expect(response).to have_http_status(:success)
+      end
+    end
+
+    context '異常なパラメータの場合' do
+      let(:invalid_params) {{ name: nil }}
+
+      it 'グループ名が更新されないこと' do
+        put api_group_path(group), params: invalid_params
+
+        expect(group.reload.name).to eq 'default_name'
       end
     end
   end

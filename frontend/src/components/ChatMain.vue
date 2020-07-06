@@ -2,8 +2,12 @@
   <article class='chat-main'>
     <header class='group-header'>
       <div class="current-group">
-        <p class='current-group-name'>CurrentGroup</p>
-        <p class='edit-group-btn'>編集</p>
+        <p class='current-group-name'>{{ this.currentGroup.name }}</p>
+        <p @click="openEditModal" class='edit-group-btn'>編集</p>
+        <Modal ref='modalEdit' @close="closeEditModal" v-if='modalEdit'>
+          <!-- Modalのslotに差し込む -->
+          <button @click="updateGroup">編集</button>
+        </Modal>
       </div>
       <p class='remove-group-btn'>チャットグループを削除する</p>
     </header>
@@ -35,6 +39,55 @@
 </template>
 
 <script>
+  import axios from 'axios'
+  import {getGroups} from '../modules/api'
+  import Modal from './Modal.vue'
+
+  export default {
+    components: { Modal },
+    data() {
+      return {
+        modalEdit: false,
+        currentGroup: {},
+        groupChannel: null // ActionCable用
+      }
+    },
+    created() {
+      this.groupChannel = this.$cable.subscriptions.create( "GroupChannel",{
+        received: (data) => {
+          // ActionCableで配信されてきたものがdataに入る
+          // updateならdataはcurrentGroupと同じグループのはずなのでヘッダのグループ名を更新
+          // createの時は何もしない(Sidebarコンポーネントの更新はある)
+          if (data.id === this.currentGroup.id) {
+            this.currentGroup = data
+          }
+        },
+      })
+    },
+    mounted() {
+      this.fetchCurrentGroup()
+    },
+    methods: {
+      openEditModal() {
+        this.modalEdit = true
+      },
+      closeEditModal() {
+        this.modalEdit = false
+      },
+      // api.jsに引っ越すとうまくいかない
+      // this.currentGroupに対して別メソッド内で代入するとおかしくなる？
+      fetchCurrentGroup(id) {
+        axios
+          .get(`/api/groups/${id}`)
+            .then((res) => {
+              this.currentGroup = res.data
+            })
+      },
+      updateGroup() {
+        this.$refs.modalEdit.updateGroup(this.currentGroup.id)
+      },
+    }
+  }
 </script>
 
 <style scoped>
@@ -64,6 +117,10 @@
     margin-left: 1rem;
     padding-top: 1rem;
     color: #aaa;
+    cursor: pointer;
+  }
+  .group-form-label {
+    color: #222;
   }
   .remove-group-btn {
     margin-right: 1rem;

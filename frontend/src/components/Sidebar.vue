@@ -1,19 +1,10 @@
 <template>
   <aside class='sidebar'>
-    <!-- クリックしたらopenModalメソッドを動かす -->
-    <span @click="openModal" class="material-icons new-group-btn">add_circle_outline</span>
-    <!-- data.modalがtrueになったらModalコンポーネントが表示される -->
-    <Modal ref='modal' @close='closeModal' v-if='modal'>
-      <!-- methodはこっちに書きたいのでslotを使う -->
+    <span @click="openNewModal" class="material-icons new-group-btn">add_circle_outline</span>
+    <!-- 子コンポーネントからcloseの発火を受けたらcloseNewModalを動かす -->
+    <Modal ref='modalNew' @close="closeNewModal" v-if='modalNew'>
       <!-- Modalのslotに差し込む -->
-      <label class='group-form-label'>グループ名</label>
-      <div><input v-model="groupName"></div>
-      <!-- slot ここまで -->
-      <!-- Modalのslot name=footerに差し込む -->
-      <template slot="footer">
-        <button @click="createGroup">送信</button>
-      </template>
-      <!-- slot name=footer ここまで -->
+      <button @click="createGroup">送信</button>
     </Modal>
     <section class='group-container'>
       <div class='group'  v-for="group in groupList" :key="group.id">
@@ -26,14 +17,14 @@
 
 <script>
   import axios from 'axios'
+  import {getGroups} from '../modules/api'
   import Modal from './Modal.vue'
 
   export default {
     components: { Modal },
     data() {
       return {
-        modal: false, // modalの表示/非表示管理
-        groupName: '',
+        modalNew: false,
         groupList: [],
         groupChannel: null // ActionCable用
       }
@@ -41,8 +32,9 @@
     created() {
       this.groupChannel = this.$cable.subscriptions.create( "GroupChannel",{
         received: (data) => {
-          // ActionCableで配信されてきたものがdataに入る
-          this.groupList.push(data)
+          // ActionCableから配信があったらサイドバーを更新する
+          this.groupList = []
+          this.fetchGroups()
         },
       })
     },
@@ -51,26 +43,20 @@
       this.fetchGroups()
     },
     methods: {
+      openNewModal() {
+        this.modalNew = true
+      },
+      closeNewModal() {
+        this.modalNew = false
+      },
       fetchGroups() {
-        // /api/groupsを叩いてレスポンスをresで受け取る
-        axios.get('/api/groups').then((res) => {
-          // res.dataにコントローラで作った@groupsのJSONが入ってる
-          for(var i = 0; i < res.data.length; i++) {
-            // this.groupsに上記jsonをforで回しながらpushしていく
-            this.groupList.push(res.data[i]);
-          }
-        }, (error) => {
-          alert(error)
-        });
-      },
-      openModal() {
-        this.modal = true
-      },
-      closeModal() {
-        this.modal = false
+        // api.jsのgetGroupsにgroupListを渡す
+        getGroups(this.groupList)
       },
       createGroup() {
-        this.$refs.modal.createGroup()
+        // $refsで子コンポーネントのメソッドを使える
+        // modalNewはModalコンポーネントを呼ぶ時にref=を使って名付けている
+        this.$refs.modalNew.createGroup()
       }
     }
   }
@@ -91,9 +77,6 @@
     padding-bottom: 1.2rem;
     font-size: 3rem;
     cursor: pointer;
-  }
-  .group-form-label {
-    color: #222;
   }
   .group-container {
     height: calc(100% - 5.4rem);

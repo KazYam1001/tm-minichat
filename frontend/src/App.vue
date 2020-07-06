@@ -11,12 +11,13 @@
 
   export default {
     data: ()=>{
-      return {}
+      return {
+      }
     },
     components: {
       Sidebar,
       ChatMain
-    }
+    },
   }
 </script>
 

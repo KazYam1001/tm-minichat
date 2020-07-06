@@ -24,7 +24,7 @@ class Api::GroupsController < ApplicationController
     group = Group.find(params[:id])
     group.destroy
     next_group = Group.first
-    render json: {group: next_group, action: :destroy}
+    render json: {removed_id: params[:id].to_i, group: next_group, action: :destroy}
   end
 
   private

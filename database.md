@@ -46,10 +46,8 @@
 |name|type|options|
 |-|-|-|
 |content|text|null: false|
-|user|references|null: false, foreign_key: true|
 |group|references|null: false, foreign_key: true|
 ## associations
-- belongs_to :user
 - belongs_to :group
 ## validations
 - validates :content, presence: true

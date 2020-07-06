@@ -53,23 +53,3 @@ export const putGroup = (token, groupId, groupName, groupChannel)=> {
       }
     })
 }
-
-// グループ削除
-export const deleteGroup = (token, groupId, groupChannel)=> {
-  axios
-    .delete(`/api/groups/${groupId}`, {
-      data: { // deleteでparamsを送りたい時は data: が必要
-        authenticity_token: token
-      }
-    })
-      .then((res)=> {
-        if (res.status === 200) {
-          groupChannel.perform('display', {
-            // 返り値は存在する別のグループ
-            group: res.data
-          });
-        } else {
-          alert(`${res.status} ${res.statusText}`)
-        }
-      })
-}

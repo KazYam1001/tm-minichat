@@ -9,7 +9,7 @@
           <button @click="updateGroup">編集</button>
         </Modal>
       </div>
-      <p @click="destroyGroup" class='remove-group-btn'>チャットグループを削除する</p>
+      <p class='remove-group-btn'>チャットグループを削除する</p>
     </header>
     <section class='message-container'>
       <p class='message'>hello</p>
@@ -40,7 +40,7 @@
 
 <script>
   import axios from 'axios'
-  import {deleteGroup} from '../modules/api'
+  import {getGroups} from '../modules/api'
   import Modal from './Modal.vue'
 
   export default {
@@ -49,29 +49,22 @@
       return {
         modalEdit: false,
         currentGroup: {},
-        groupChannel: null, // ActionCable用
-        token: ''
+        groupChannel: null // ActionCable用
       }
     },
     created() {
       this.groupChannel = this.$cable.subscriptions.create( "GroupChannel",{
         received: (data) => {
           // ActionCableで配信されてきたものがdataに入る
-          // data.actionにどのアクションから来たか(create/update/destroy)を格納してある
-          if (data.action === 'update') {
-            // updateならdataはcurrentGroupと同じグループのはずなのでヘッダのグループ名を更新
-            this.currentGroup = data.group
-          } else if (data.action === 'destroy') {
-            // destroyなら別のグループが送られてきているので削除されたことを通知して移動
-            alert('このグループは削除されたため、別のグループへ移動します')
-            this.currentGroup = data.group
-          }
+          // updateならdataはcurrentGroupと同じグループのはずなのでヘッダのグループ名を更新
           // createの時は何もしない(Sidebarコンポーネントの更新はある)
+          if (data.id === this.currentGroup.id) {
+            this.currentGroup = data
+          }
         },
       })
     },
     mounted() {
-      this.token = document.querySelector('meta[name=csrf-token]').getAttribute('content')
       this.fetchCurrentGroup()
     },
     methods: {
@@ -93,11 +86,6 @@
       updateGroup() {
         this.$refs.modalEdit.updateGroup(this.currentGroup.id)
       },
-      destroyGroup() {
-        if (confirm('本当に削除しますか？')) {
-          deleteGroup(this.token, this.currentGroup.id, this.groupChannel)
-        }
-      }
     }
   }
 </script>
@@ -137,7 +125,6 @@
   .remove-group-btn {
     margin-right: 1rem;
     color: #aaa;
-    cursor: pointer;
   }
   .message-container {
     padding-top: 1rem;

@@ -56,7 +56,6 @@ export const putGroup = (token, groupId, groupName, groupChannel)=> {
 
 // グループ削除
 export const deleteGroup = (token, groupId, groupChannel)=> {
-  console.log(token)
   axios
     .delete(`/api/groups/${groupId}`, {
       data: { // deleteでparamsを送りたい時は data: が必要
@@ -66,7 +65,7 @@ export const deleteGroup = (token, groupId, groupChannel)=> {
       .then((res)=> {
         if (res.status === 200) {
           groupChannel.perform('display', {
-            // 返り値は削除したグループのid
+            // 返り値は存在する別のグループ
             group: res.data
           });
         } else {

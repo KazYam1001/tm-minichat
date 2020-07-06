@@ -11,13 +11,20 @@ class Api::GroupsController < ApplicationController
 
   def create
     group = Group.create(group_params)
-    render json: group
+    render json: {group: group, action: :create}
   end
 
   def update
     group = Group.find(params[:id])
     group.update(group_params)
-    render json: group
+    render json: {group: group, action: :update}
+  end
+
+  def destroy
+    group = Group.find(params[:id])
+    group.destroy
+    next_group = Group.first
+    render json: {group: next_group, action: :destroy}
   end
 
   private

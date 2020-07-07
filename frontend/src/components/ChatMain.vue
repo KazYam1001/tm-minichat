@@ -41,11 +41,11 @@
         received: (data) => {
           // ActionCableで配信されてきたものがdataに入る
           // data.actionにどのアクションから来たか(create/update/destroy)を格納してある
-          if (data.action === 'update') {
-            // updateならdataはcurrentGroupと同じグループのはずなのでヘッダのグループ名を更新
-            this.$store.setCurrentGroup(data.group)
-          } else if (data.action === 'destroy') {
-            // destroyなら別のグループが送られてきているので削除されたことを通知して移動
+          if (data.action === 'update' && data.group.id === this.sharedState.currentGroup.id) {
+            // updateかつ、currentGroupへの更新ならヘッダのグループ名を更新
+            store.setCurrentGroup(data.group)
+          } else if (data.action === 'destroy' && data.removed_id === this.sharedState.currentGroup.id) {
+            // destroyかつ、currentGroupが削除されたなら別のグループが送られてきているので削除されたことを通知して移動
             alert('このグループは削除されたため、別のグループへ移動します')
             this.$store.setCurrentGroup(data.group)
           }

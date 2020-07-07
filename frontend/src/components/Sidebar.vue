@@ -8,7 +8,7 @@
     </Modal>
     <section class='group-container'>
       <div class='group'  v-for="group in groupList" :key="group.id">
-        <p class='group-name'>{{ group.name }}</p>
+        <p @click="selectGroup(group)" class='group-name'>{{ group.name }}</p>
         <span class='group-notice'> {{ group.id }} </span>
       </div>
     </section>
@@ -17,6 +17,7 @@
 
 <script>
   import axios from 'axios'
+  import store from '../store'
   import {getGroups} from '../modules/api'
   import Modal from './Modal.vue'
 
@@ -57,6 +58,9 @@
         // $refsで子コンポーネントのメソッドを使える
         // modalNewはModalコンポーネントを呼ぶ時にref=を使って名付けている
         this.$refs.modalNew.createGroup()
+      },
+      selectGroup(group) {
+        store.setCurrentGroup(group)
       }
     }
   }
@@ -88,6 +92,7 @@
   }
   .group-name {
     margin-right: 1rem;
+    cursor: pointer;
   }
   .group-notice {
     height: 1.5rem;

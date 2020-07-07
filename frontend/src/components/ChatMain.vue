@@ -2,7 +2,7 @@
   <article class='chat-main'>
     <header class='group-header'>
       <div class="current-group">
-        <p class='current-group-name'>{{ this.currentGroup.name }}</p>
+        <p class='current-group-name'>{{ sharedState.currentGroup.name }}</p>
         <p @click="openEditModal" class='edit-group-btn'>編集</p>
         <Modal ref='modalEdit' @close="closeEditModal" v-if='modalEdit'>
           <!-- Modalのslotに差し込む -->
@@ -40,6 +40,7 @@
 
 <script>
   import axios from 'axios'
+  import store from '../store'
   import {deleteGroup} from '../modules/api'
   import Modal from './Modal.vue'
 
@@ -48,7 +49,7 @@
     data() {
       return {
         modalEdit: false,
-        currentGroup: {},
+        sharedState: store.state, // store.stateまでしか読めない？currentGroupつけるとエラー
         groupChannel: null, // ActionCable用
         token: ''
       }
@@ -58,13 +59,13 @@
         received: (data) => {
           // ActionCableで配信されてきたものがdataに入る
           // data.actionにどのアクションから来たか(create/update/destroy)を格納してある
-          if (data.action === 'update') {
-            // updateならdataはcurrentGroupと同じグループのはずなのでヘッダのグループ名を更新
-            this.currentGroup = data.group
-          } else if (data.action === 'destroy') {
-            // destroyなら別のグループが送られてきているので削除されたことを通知して移動
+          if (data.action === 'update' && data.group.id === this.sharedState.currentGroup.id) {
+            // updateかつ、currentGroupへの更新ならヘッダのグループ名を更新
+            store.setCurrentGroup(data.group)
+          } else if (data.action === 'destroy' && data.removed_id === this.sharedState.currentGroup.id) {
+            // destroyかつ、currentGroupが削除されたなら別のグループが送られてきているので削除されたことを通知して移動
             alert('このグループは削除されたため、別のグループへ移動します')
-            this.currentGroup = data.group
+            store.setCurrentGroup(data.group)
           }
           // createの時は何もしない(Sidebarコンポーネントの更新はある)
         },
@@ -81,21 +82,21 @@
       closeEditModal() {
         this.modalEdit = false
       },
-      // api.jsに引っ越すとうまくいかない
-      // this.currentGroupに対して別メソッド内で代入するとおかしくなる？
       fetchCurrentGroup(id) {
         axios
           .get(`/api/groups/${id}`)
             .then((res) => {
-              this.currentGroup = res.data
+              // currentGroupの状態はstoreで管理している
+              // store内のデータ書き換えはstore内のメソッドに任せる
+              store.setCurrentGroup(res.data)
             })
       },
       updateGroup() {
-        this.$refs.modalEdit.updateGroup(this.currentGroup.id)
+        this.$refs.modalEdit.updateGroup(this.sharedState.currentGroup.id)
       },
       destroyGroup() {
         if (confirm('本当に削除しますか？')) {
-          deleteGroup(this.token, this.currentGroup.id, this.groupChannel)
+          deleteGroup(this.token, this.sharedState.currentGroup.id, this.groupChannel)
         }
       }
     }

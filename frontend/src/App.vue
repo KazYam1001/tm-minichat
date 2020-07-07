@@ -8,6 +8,7 @@
 <script>
   import Sidebar from './components/Sidebar.vue'
   import ChatMain from './components/ChatMain.vue'
+  import {getMessages} from './modules/api'
 
   export default {
     data: ()=>{
@@ -18,6 +19,18 @@
       Sidebar,
       ChatMain
     },
+    methods: {
+      fetchMessages(group) {
+        getMessages(group)
+          .then((res)=>{
+            if (res.status === 200) {
+              this.$store.setMessageList(res.data)
+            } else {
+              alert(`${res.status} ${res.statusText}`)
+            }
+          })
+      },
+    }
   }
 </script>
 

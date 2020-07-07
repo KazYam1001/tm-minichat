@@ -17,7 +17,6 @@
 
 <script>
   import axios from 'axios'
-  import store from '../store'
   import {getGroups} from '../modules/api'
   import Modal from './Modal.vue'
 
@@ -27,7 +26,7 @@
       return {
         modalNew: false,
         groupList: [],
-        groupChannel: null // ActionCable用
+        groupChannel: null, // ActionCable用
       }
     },
     created() {
@@ -60,7 +59,8 @@
         this.$refs.modalNew.createGroup()
       },
       selectGroup(group) {
-        store.setCurrentGroup(group)
+        this.$store.setCurrentGroup(group)
+        this.$parent.fetchMessages(group)
       }
     }
   }

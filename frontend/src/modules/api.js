@@ -79,3 +79,12 @@ export const deleteGroup = (token, groupId, groupChannel)=> {
 export const getMessages = (group)=> {
   return axios.get(`/api/groups/${group.id}/messages`)
 }
+
+// メッセージ作成
+export const postMessage = (group, content, token)=> {
+  return axios
+    .post(`/api/groups/${group.id}/messages`, {
+      authenticity_token: token,
+      content: content,
+    })
+}

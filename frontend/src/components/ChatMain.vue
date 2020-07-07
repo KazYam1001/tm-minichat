@@ -14,8 +14,8 @@
     <section class='message-container'>
       <p v-for="message in sharedState.messageList" :key="message.id" class='message'>{{ message.content }}</p>
     </section>
-    <form action="#" class="message-form">
-      <input type="text" class='message-text-field'>
+    <form @submit.prevent="createMessage" action="#" class="message-form">
+      <input v-model="messageContent" type="text" class='message-text-field'>
       <input type="submit" class='submit-btn'>
     </form>
   </article>
@@ -23,7 +23,7 @@
 
 <script>
   import axios from 'axios'
-  import {deleteGroup} from '../modules/api'
+  import {deleteGroup, postMessage} from '../modules/api'
   import Modal from './Modal.vue'
 
   export default {
@@ -31,6 +31,7 @@
     data() {
       return {
         groupChannel: null, // ActionCable用
+        messageContent: '',
         modalEdit: false,
         sharedState: this.$store.state, // store.stateまでしか読めない？currentGroupつけるとエラー
         token: '',
@@ -64,6 +65,7 @@
       closeEditModal() {
         this.modalEdit = false
       },
+      // グループ CRUD操作
       fetchCurrentGroup(id) {
         axios
           .get(`/api/groups/${id}`)
@@ -82,6 +84,18 @@
         if (confirm('本当に削除しますか？')) {
           deleteGroup(this.token, this.sharedState.currentGroup.id, this.groupChannel)
         }
+      },
+      // グループ関係ここまで
+      createMessage() {
+        postMessage(this.sharedState.currentGroup, this.messageContent, this.token)
+          .then((res)=>{
+            if (res.status === 200) {
+              console.log(res.data)
+              this.messageContent = ''
+            } else {
+              alert(`${res.status} ${res.statusText}`)
+            }
+          })
       }
     }
   }

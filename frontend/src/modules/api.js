@@ -56,7 +56,6 @@ export const putGroup = (token, groupId, groupName, groupChannel)=> {
 
 // グループ削除
 export const deleteGroup = (token, groupId, groupChannel)=> {
-  console.log(token)
   axios
     .delete(`/api/groups/${groupId}`, {
       data: { // deleteでparamsを送りたい時は data: が必要

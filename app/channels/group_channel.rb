@@ -10,4 +10,9 @@ class GroupChannel < ApplicationCable::Channel
   def display(data)
     ActionCable.server.broadcast 'group_channel', data['group']
   end
+
+  def talk(data)
+    ActionCable.server.broadcast 'group_channel', message: data['message']
+  end
+
 end

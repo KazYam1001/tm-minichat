@@ -74,3 +74,8 @@ export const deleteGroup = (token, groupId, groupChannel)=> {
         }
       })
 }
+
+// メッセージ全件取得
+export const getMessages = (group)=> {
+  return axios.get(`/api/groups/${group.id}/messages`)
+}

@@ -90,3 +90,12 @@ export const getMessages = (group)=> {
   const path = `/api/groups/${group.id}/messages`
   return axios.get(constant.LocalOrigin + path)
 }
+
+// メッセージ作成
+export const postMessage = (group, content, token)=> {
+  return axios
+    .post(`/api/groups/${group.id}/messages`, {
+      authenticity_token: token,
+      content: content,
+    })
+}

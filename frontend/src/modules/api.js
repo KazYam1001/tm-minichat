@@ -1,10 +1,12 @@
 import axios from 'axios'
+import constant from '../config/constant'
 
 // グループ全件取得
 // /api/groupsを叩き、結果をgroupListに入れる
 export const getGroups = (groupList)=> {
+  const path = '/api/groups'
   axios
-    .get('/api/groups')
+    .get(constant.LocalOrigin + path)
       .then(
         (res) => {
           for(var i = 0; i < res.data.length; i++) {
@@ -18,10 +20,17 @@ export const getGroups = (groupList)=> {
       )
 }
 
+// グループ1件取得
+export const getGroup = (id)=>{
+  const path = `/api/groups/${id}`
+  return axios.get(constant.LocalOrigin + path)
+}
+
 // グループ作成
 export const postGroup = (token, groupName, groupChannel)=> {
+  const path = '/api/groups'
   axios
-    .post('/api/groups', {
+    .post(constant.LocalOrigin + path, {
       authenticity_token: token,
       name: groupName
     })
@@ -38,8 +47,9 @@ export const postGroup = (token, groupName, groupChannel)=> {
 
 // グループ編集
 export const putGroup = (token, groupId, groupName, groupChannel)=> {
+  const path = `/api/groups/${groupId}`
   axios
-    .put(`/api/groups/${groupId}`, {
+    .put(constant.LocalOrigin + path, {
       authenticity_token: token,
       name: groupName
     })
@@ -56,8 +66,9 @@ export const putGroup = (token, groupId, groupName, groupChannel)=> {
 
 // グループ削除
 export const deleteGroup = (token, groupId, groupChannel)=> {
+  const path = `/api/groups/${groupId}`
   axios
-    .delete(`/api/groups/${groupId}`, {
+    .delete(constant.LocalOrigin + path, {
       data: { // deleteでparamsを送りたい時は data: が必要
         authenticity_token: token
       }
@@ -76,7 +87,8 @@ export const deleteGroup = (token, groupId, groupChannel)=> {
 
 // メッセージ全件取得
 export const getMessages = (group)=> {
-  return axios.get(`/api/groups/${group.id}/messages`)
+  const path = `/api/groups/${group.id}/messages`
+  return axios.get(constant.LocalOrigin + path)
 }
 
 // メッセージ作成

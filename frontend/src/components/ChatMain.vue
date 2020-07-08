@@ -12,24 +12,7 @@
       <p @click="destroyGroup" class='remove-group-btn'>チャットグループを削除する</p>
     </header>
     <section class='message-container'>
-      <p class='message'>hello</p>
-      <p class='message'>hi</p>
-      <p class='message'>good bye</p>
-      <p class='message'>hello</p>
-      <p class='message'>hi</p>
-      <p class='message'>good bye</p>
-      <p class='message'>hello</p>
-      <p class='message'>hi</p>
-      <p class='message'>good bye</p>
-      <p class='message'>hello</p>
-      <p class='message'>hi</p>
-      <p class='message'>good bye</p>
-      <p class='message'>hello</p>
-      <p class='message'>hi</p>
-      <p class='message'>good bye</p>
-      <p class='message'>hello</p>
-      <p class='message'>hi</p>
-      <p class='message'>good bye</p>
+      <p v-for="message in sharedState.messageList" :key="message.id" class='message'>{{ message.content }}</p>
     </section>
     <form action="#" class="message-form">
       <input type="text" class='message-text-field'>
@@ -40,18 +23,17 @@
 
 <script>
   import axios from 'axios'
-  import store from '../store'
-  import {deleteGroup} from '../modules/api'
+  import {getGroup, deleteGroup} from '../modules/api'
   import Modal from './Modal.vue'
 
   export default {
     components: { Modal },
     data() {
       return {
-        modalEdit: false,
-        sharedState: store.state, // store.stateまでしか読めない？currentGroupつけるとエラー
         groupChannel: null, // ActionCable用
-        token: ''
+        modalEdit: false,
+        sharedState: this.$store.state, // store.stateまでしか読めない？currentGroupつけるとエラー
+        token: '',
       }
     },
     created() {
@@ -61,11 +43,11 @@
           // data.actionにどのアクションから来たか(create/update/destroy)を格納してある
           if (data.action === 'update' && data.group.id === this.sharedState.currentGroup.id) {
             // updateかつ、currentGroupへの更新ならヘッダのグループ名を更新
-            store.setCurrentGroup(data.group)
+            this.$store.setCurrentGroup(data.group)
           } else if (data.action === 'destroy' && data.removed_id === this.sharedState.currentGroup.id) {
             // destroyかつ、currentGroupが削除されたなら別のグループが送られてきているので削除されたことを通知して移動
             alert('このグループは削除されたため、別のグループへ移動します')
-            store.setCurrentGroup(data.group)
+            this.$store.setCurrentGroup(data.group)
           }
           // createの時は何もしない(Sidebarコンポーネントの更新はある)
         },
@@ -83,13 +65,14 @@
         this.modalEdit = false
       },
       fetchCurrentGroup(id) {
-        axios
-          .get(`/api/groups/${id}`)
-            .then((res) => {
-              // currentGroupの状態はstoreで管理している
-              // store内のデータ書き換えはstore内のメソッドに任せる
-              store.setCurrentGroup(res.data)
-            })
+        getGroup(id)
+          .then((res) => {
+            // currentGroupの状態はstoreで管理している
+            // store内のデータ書き換えはstore内のメソッドに任せる
+            this.$store.setCurrentGroup(res.data)
+            // メッセージ一覧もセットで取得する
+            this.$parent.fetchMessages(res.data)
+          })
       },
       updateGroup() {
         this.$refs.modalEdit.updateGroup(this.sharedState.currentGroup.id)

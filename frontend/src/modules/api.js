@@ -65,7 +65,7 @@ export const deleteGroup = (token, groupId, groupChannel)=> {
       .then((res)=> {
         if (res.status === 200) {
           groupChannel.perform('display', {
-            // 返り値は削除したグループのid
+            // 返り値は存在する別のグループ
             group: res.data
           });
         } else {

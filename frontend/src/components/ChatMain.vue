@@ -57,7 +57,7 @@
           } else if (data.action === 'destroy' && data.removed_id === this.sharedState.currentGroup.id) {
             // destroyかつ、currentGroupが削除されたなら別のグループが送られてきているので削除されたことを通知して移動
             alert('このグループは削除されたため、別のグループへ移動します')
-            this.$store.setCurrentGroup(data.group)
+            this.fetchCurrentGroup(data.group.id)
           }
           // createの時は何もしない(Sidebarコンポーネントの更新はある)
         },

@@ -14,8 +14,8 @@
     <section class='message-container'>
       <p v-for="message in sharedState.messageList" :key="message.id" class='message'>{{ message.content }}</p>
     </section>
-    <form @submit.prevent="createMessage" action="#" class="message-form">
-      <input v-model="messageContent" type="text" class='message-text-field'>
+    <form action="#" class="message-form">
+      <input type="text" class='message-text-field'>
       <input type="submit" class='submit-btn'>
     </form>
   </article>
@@ -23,7 +23,7 @@
 
 <script>
   import axios from 'axios'
-  import {getGroup, deleteGroup, postMessage} from '../modules/api'
+  import {getGroup, deleteGroup} from '../modules/api'
   import Modal from './Modal.vue'
 
   export default {
@@ -31,7 +31,6 @@
     data() {
       return {
         groupChannel: null, // ActionCable用
-        messageContent: '',
         modalEdit: false,
         sharedState: this.$store.state, // store.stateまでしか読めない？currentGroupつけるとエラー
         token: '',
@@ -41,15 +40,6 @@
       this.groupChannel = this.$cable.subscriptions.create( "GroupChannel",{
         received: (data) => {
           // ActionCableで配信されてきたものがdataに入る
-
-          // group_channel#talkの場合 (data.messageが存在する)
-          // メッセージのgroup_idがcurrentGroupのidと同じなら、メッセージを追加する
-          if (data.message && data.message.group_id === this.sharedState.currentGroup.id) {
-            this.sharedState.messageList.push(data.message)
-            return
-          }
-
-          // group_channel#displayの場合 (data.messageが無い)
           // data.actionにどのアクションから来たか(create/update/destroy)を格納してある
           if (data.action === 'update' && data.group.id === this.sharedState.currentGroup.id) {
             // updateかつ、currentGroupへの更新ならヘッダのグループ名を更新
@@ -57,7 +47,7 @@
           } else if (data.action === 'destroy' && data.removed_id === this.sharedState.currentGroup.id) {
             // destroyかつ、currentGroupが削除されたなら別のグループが送られてきているので削除されたことを通知して移動
             alert('このグループは削除されたため、別のグループへ移動します')
-            this.fetchCurrentGroup(data.group.id)
+            this.$store.setCurrentGroup(data.group)
           }
           // createの時は何もしない(Sidebarコンポーネントの更新はある)
         },
@@ -74,7 +64,6 @@
       closeEditModal() {
         this.modalEdit = false
       },
-      // グループ CRUD操作
       fetchCurrentGroup(id) {
         getGroup(id)
           .then((res) => {
@@ -92,21 +81,6 @@
         if (confirm('本当に削除しますか？')) {
           deleteGroup(this.token, this.sharedState.currentGroup.id, this.groupChannel)
         }
-      },
-      // グループ関係ここまで
-      createMessage() {
-        postMessage(this.sharedState.currentGroup, this.messageContent, this.token)
-          .then((res)=>{
-            if (res.status === 200) {
-              // group_channelのtalkを叩く
-              this.groupChannel.perform('talk', {
-                message: res.data
-              });
-              this.messageContent = ''
-            } else {
-              alert(`${res.status} ${res.statusText}`)
-            }
-          })
       }
     }
   }
